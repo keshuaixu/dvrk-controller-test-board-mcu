@@ -23,22 +23,26 @@ Ticker enc_ticker;
 Ticker beep_ticker;
 volatile uint32_t encoder_count = 0;
 
-const uint16_t pot1_test_voltage = 0x4000 * 4.5 / 3.3; // 0x5000 in qladisp 
+const uint16_t pot1_test_voltage = 0x4000 * 4.5 / 3.3; // 0x4000 in qladisp 
 double pot_voltage_coefficient = 1.0;
 
 volatile bool beep_enable = 0;
+volatile bool digin_state = 0;
 
 void increment_encoder() {
   encoder_count += 1;
   enc_a = (encoder_count / 2) % 2;
   enc_b = ((encoder_count - 1) / 2) % 2; 
 
-  inst_loopback = enc_a;
-  slave_clutch = enc_a;
-  st_adap = enc_a;
-  sj2_reln = enc_a;
-  sj2_rel = enc_a;
-  arm_present = enc_a;
+  if (encoder_count % 10 == 0) {
+    digin_state = !digin_state;
+  }
+  inst_loopback = digin_state;
+  slave_clutch = digin_state;
+  st_adap = digin_state;
+  sj2_reln = digin_state;
+  sj2_rel = digin_state;
+  arm_present = digin_state;
 }
 
 void beep_func() {
@@ -50,8 +54,8 @@ double adc_to_deg_c(double adc) {
 }
 
 int main() {
-  enc_ticker.attach(&increment_encoder, 0.2);
-  beep_ticker.attach(&beep_func, 1.0/8e3);
+  enc_ticker.attach(&increment_encoder, 0.1);
+//   beep_ticker.attach(&beep_func, 1.0/8e3);
 
 
   while(1) {
